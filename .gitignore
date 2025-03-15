@@ -6,3 +6,5 @@ movie/
 movie.mp4
 Releases/
 vendor/
+# Added by goreleaser init:
+dist/
