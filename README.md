@@ -23,7 +23,7 @@ golang 多线程下载直播流m3u8格式的视屏，跨平台。 你只需指�
 - u  m3u8下载地址(http(s)://url/xx/xx/index.m3u8)
 - o  movieName:自定义文件名(默认为movie)不带后缀 (default "movie")
 - n  num:下载线程数(默认24)
-- ht hostType:设置getHost的方式(v1: http(s):// + url.Host + filepath.Dir(url.Path); v2: `http(s)://+ u.Host` (default "v1")
+- ht hostType:设置getHost的方式(v1: http(s):// + url.Host + path.Dir(url.Path); v2: `http(s)://+ u.Host` (default "v1")
 - c  cookie:自定义请求cookie (例如：key1=v1; key2=v2)
 - r  autoClear:是否自动清除ts文件 (default true)
 - s  InsecureSkipVerify:是否允许不安全的请求(默认0)
@@ -34,16 +34,7 @@ golang 多线程下载直播流m3u8格式的视屏，跨平台。 你只需指�
 
 ## 下载
 
-已经编译好的平台有： [点击下载](https://github.com/llychao/m3u8-downloader/releases)
-
-- m3u8-darwin-amd64
-- m3u8-darwin-arm64
-- m3u8-linux-386
-- m3u8-linux-amd64
-- m3u8-linux-arm64
-- m3u8-windows-386.exe
-- m3u8-windows-amd64.exe
-- m3u8-windows-arm64.exe
+已经编译好的平台有： [点击下载](https://github.com/forkdo/m3u8-downloader/releases)
 
 ## 用法
 

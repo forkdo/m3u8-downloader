@@ -11,11 +11,11 @@ import (
 	"crypto/cipher"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -39,7 +39,7 @@ var (
 	// 命令行参数
 	urlFlag = flag.String("u", "", "m3u8下载地址(http(s)://url/xx/xx/index.m3u8)")
 	nFlag   = flag.Int("n", 24, "num:下载线程数(默认24)")
-	htFlag  = flag.String("ht", "v1", "hostType:设置getHost的方式(v1: `http(s):// + url.Host + filepath.Dir(url.Path)`; v2: `http(s)://+ u.Host`")
+	htFlag  = flag.String("ht", "v1", "hostType:设置getHost的方式(v1: `http(s):// + url.Host + path.Dir(url.Path)`; v2: `http(s)://+ u.Host`")
 	oFlag   = flag.String("o", "movie", "movieName:自定义文件名(默认为movie)不带后缀")
 	cFlag   = flag.String("c", "", "cookie:自定义请求cookie")
 	rFlag   = flag.Bool("r", true, "autoClear:是否自动清除ts文件")
@@ -140,7 +140,7 @@ func Run() {
 
 	//5、输出下载视频信息
 	DrawProgressBar("Merging", float32(1), PROGRESS_WIDTH, mv)
-	fmt.Printf("\n[Success] 下载保存路径：%s | 共耗时: %6.2fs\n", mv, time.Now().Sub(now).Seconds())
+	fmt.Printf("\n[Success] 下载保存路径：%s | 共耗时: %6.2fs\n", mv, time.Since(now).Seconds())
 }
 
 // 获取m3u8地址的host
@@ -149,7 +149,7 @@ func getHost(Url, ht string) (host string) {
 	checkErr(err)
 	switch ht {
 	case "v1":
-		host = u.Scheme + "://" + u.Host + filepath.Dir(u.EscapedPath())
+		host = u.Scheme + "://" + u.Host + path.Dir(u.EscapedPath())
 	case "v2":
 		host = u.Scheme + "://" + u.Host
 	}
@@ -172,7 +172,7 @@ func getM3u8Key(host, html string) (key string) {
 			if !strings.Contains(line, "URI") {
 				continue
 			}
-			fmt.Println("[debug] line_key:",line)
+			fmt.Println("[debug] line_key:", line)
 			uri_pos := strings.Index(line, "URI")
 			quotation_mark_pos := strings.LastIndex(line, "\"")
 			key_url := strings.Split(line[uri_pos:quotation_mark_pos], "\"")[1]
@@ -187,7 +187,7 @@ func getM3u8Key(host, html string) (key string) {
 			}
 		}
 	}
-	fmt.Println("[debug] m3u8Host:",host,"m3u8Key:",key)
+	fmt.Println("[debug] m3u8Host:", host, "m3u8Key:", key)
 	return
 }
 
@@ -219,7 +219,7 @@ func getTsList(host, body string) (tsList []TsInfo) {
 }
 
 func getFromFile() string {
-	data, _ := ioutil.ReadFile("./ts.txt")
+	data, _ := os.ReadFile("./ts.txt")
 	return string(data)
 }
 
@@ -283,7 +283,7 @@ func downloadTsFile(ts TsInfo, download_dir, key string, retries int) {
 			break
 		}
 	}
-	ioutil.WriteFile(curr_path_file, origData, 0666)
+	os.WriteFile(curr_path_file, origData, 0666)
 }
 
 // downloader m3u8 下载器
@@ -304,7 +304,6 @@ func downloader(tsList []TsInfo, maxGoroutines int, downloadDir string, key stri
 			downloadTsFile(ts, downloadDir, key, retryies)
 			downloadCount++
 			DrawProgressBar("Downloading", float32(downloadCount)/float32(tsLen), PROGRESS_WIDTH, ts.Name)
-			return
 		}(ts, downloadDir, key, retry)
 	}
 	wg.Wait()
@@ -330,7 +329,7 @@ func mergeTs(downloadDir string) string {
 		if f.IsDir() || filepath.Ext(path) != ".ts" {
 			return nil
 		}
-		bytes, _ := ioutil.ReadFile(path)
+		bytes, _ := os.ReadFile(path)
 		_, err = writer.Write(bytes)
 		return err
 	})
